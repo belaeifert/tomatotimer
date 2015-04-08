@@ -10,6 +10,10 @@ tomatoJS.fn.initialize = function() {
     this.lapSize = 25;
     this.shortBreak = 5;
     this.longBreak = 20;
+
+    this.tomatoAudio = new Audio();
+    this.tomatoAudio.src = "alert.wav";
+
     chrome.alarms.clearAll();
     this.addEventListeners();
 };
@@ -109,9 +113,7 @@ tomatoJS.fn.getStatus = function () {
 }
 
 tomatoJS.fn.ring = function () {
-    var tomatoAudio = new Audio();        // create the audio object
-    tomatoAudio.src = "alert.wav"; // assign the audio file to it
-    tomatoAudio.play();
+    this.tomatoAudio.play();
 };
 
 var tomatoTimer =  new tomatoJS();
