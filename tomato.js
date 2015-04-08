@@ -5,30 +5,32 @@ tomatoJS.fn = tomatoJS.prototype;
 
 tomatoJS.fn.initialize = function() {
     this.isTimerOn = false;
+    this.isBreakOn = false;
     this.remainingBreaks = 3;
-    this.lapSize = 1;
-    this.shortBreak = 1;
-    this.longBreak = 1;
+    this.lapSize = 25;
+    this.shortBreak = 5;
+    this.longBreak = 15;
+    chrome.alarms.clearAll();
     this.addEventListeners();
 };
 
 tomatoJS.fn.addEventListeners = function () {
     var parent = this;
     chrome.alarms.onAlarm.addListener(function(alarm){
-        console.log(alarm);
-        if(alarm.name === 'tomato_done') {
+        if(alarm.name === 'tomato_timer_active') {
             parent.breakTomato();
         }
-        else if(alarm.name === 'break_done') {
+        else if(alarm.name === 'tomato_timer_break') {
             parent.activeTomato();
         }
     });
-    this.activeTomato();
 };
 
 tomatoJS.fn.activeTomato = function () {
-    chrome.alarms.create("tomato_done", {delayInMinutes: this.lapSize});
     this.isTimerOn = true;
+    this.isBreakOn = false;
+    chrome.alarms.clearAll();
+    chrome.alarms.create("tomato_timer_active", {delayInMinutes: this.lapSize});
     chrome.browserAction.setIcon({path:"images/pomodoro-active-19.png"});
     var notification = chrome.notifications.create(
         'tomato_start',{
@@ -42,15 +44,16 @@ tomatoJS.fn.activeTomato = function () {
 };
 
 tomatoJS.fn.breakTomato = function () {
-    this.isTimerOn = false;
+    this.isBreakOn = true;
+    chrome.alarms.clearAll();
     chrome.browserAction.setIcon({path:"images/pomodoro-break-19.png"});
     if(this.remainingBreaks > 0) {
-        chrome.alarms.create("break_done", {delayInMinutes: this.shortBreak});
+        chrome.alarms.create("tomato_timer_break", {delayInMinutes: this.shortBreak});
         var breakMsg = "Have a break! ("+this.shortBreak+" min)";
         this.remainingBreaks--;
     }
     else {
-        chrome.alarms.create("break_done", {delayInMinutes: this.longBreak});
+        chrome.alarms.create("tomato_timer_break", {delayInMinutes: this.longBreak});
         this.remainingBreaks = 3;
         var breakMsg = "Have a long break! ("+this.longBreak+" min)";
     }
@@ -67,23 +70,55 @@ tomatoJS.fn.breakTomato = function () {
 };
 
 tomatoJS.fn.stopTomato = function () {
-    chrome.alarms.clearAll();
     this.isTimerOn = false;
+    this.isBreakOn = false;
+    chrome.alarms.clearAll();
     chrome.browserAction.setIcon({path:"images/pomodoro-inactive-19.png"});
     var notification = chrome.notifications.create(
         'tomato_start',{   
         "type": 'basic', 
         "iconUrl": 'images/pomodoro-inactive-128.png', 
         "title": "Tomato Timer Off", 
-        "message": "Timer started" 
+        "message": "Pomodoro Off" 
         },
         function() {}
     );
-    notification.show();
 };
 
-var tomatoTimer =  function() {
-    return new tomatoJS();
-};
+tomatoJS.fn.getStatus = function () {
+    var  tomatoStatus = {
+        "title":"",
+        "status":"",
+    };
+    if(!this.isTimerOn) {
+        tomatoStatus.title = "Tomato Stopped";
+        tomatoStatus.status = "inactive";
+    }
+    else if(this.isBreakOn) {
+        tomatoStatus.title = "Have a break!";
+        tomatoStatus.status = "break";
+    }
+    else {
+        tomatoStatus.title = "Tomato Active!";
+        tomatoStatus.status = "active";
+    }
+    return JSON.stringify(tomatoStatus);
+}
 
-chrome.browserAction.onClicked.addListener(tomatoTimer);
+var tomatoTimer =  new tomatoJS();
+
+chrome.extension.onConnect.addListener(function(port) {
+
+    port.postMessage(tomatoTimer.getStatus());
+
+    port.onMessage.addListener(function(msg) {
+        if(msg === "tomato-start") {
+            tomatoTimer.activeTomato();
+            port.postMessage(tomatoTimer.getStatus());
+        }
+        else if(msg === "tomato-stop") {
+            tomatoTimer.stopTomato();
+            port.postMessage(tomatoTimer.getStatus());
+        }
+    });
+});
