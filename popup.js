@@ -15,7 +15,7 @@ port.onMessage.addListener(function(msg) {
       if(typeof alarm !== "undefined") {
           var time = new Date(alarm.scheduledTime);
           var remainingTime = Math.floor(((time-Date.now())/1000)/60);
-          remaining = (remainingTime > 10) ? "0"+remainingTime : remainingTime + "";
+          remaining = (remainingTime < 10) ? "0"+remainingTime : remainingTime + "";
           document.getElementById('view-time-remaining').innerHTML="00:"+remaining;
       }
       else {
