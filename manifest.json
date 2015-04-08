@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Tomato Timer",
   "description": "A pomodoro technique timer!",
-  "version": "1",
+  "version": "1.0.1",
   "browser_action": {
     "default_icon": "images/pomodoro-inactive-19.png",
     "default_title": "Tomato Timer",

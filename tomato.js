@@ -46,6 +46,9 @@ tomatoJS.fn.activeTomato = function () {
         function() {}
     );
     this.ring();
+    var notificationTimeout = window.setTimeout(function(){
+        chrome.notifications.clear('tomato_start',function(){});
+    }, 60000);
 };
 
 tomatoJS.fn.breakTomato = function () {
@@ -73,6 +76,9 @@ tomatoJS.fn.breakTomato = function () {
         function() {}
     );
     this.ring();
+    var notificationTimeout = window.setTimeout(function(){
+        chrome.notifications.clear('tomato_break',function(){});
+    }, 60000);
 };
 
 tomatoJS.fn.stopTomato = function () {
@@ -81,7 +87,7 @@ tomatoJS.fn.stopTomato = function () {
     chrome.alarms.clearAll();
     chrome.browserAction.setIcon({path:"images/pomodoro-inactive-19.png"});
     var notification = chrome.notifications.create(
-        'tomato_start',{   
+        'tomato_stop',{   
         "type": 'basic', 
         "iconUrl": 'images/pomodoro-inactive-128.png', 
         "title": "Tomato Timer Off", 
@@ -90,6 +96,9 @@ tomatoJS.fn.stopTomato = function () {
         function() {}
     );
     this.ring();
+    var notificationTimeout = window.setTimeout(function(){
+        chrome.notifications.clear('tomato_stop',function(){});
+    }, 60000);
 };
 
 tomatoJS.fn.getStatus = function () {

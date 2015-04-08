@@ -26,5 +26,5 @@ port.onMessage.addListener(function(msg) {
 });
 
 var popupTimeout = window.setTimeout(function(){
-	window.close()
+	window.close();
 }, 30000);
