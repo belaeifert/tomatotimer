@@ -9,7 +9,7 @@ tomatoJS.fn.initialize = function() {
     this.remainingBreaks = 3;
     this.lapSize = 25;
     this.shortBreak = 5;
-    this.longBreak = 15;
+    this.longBreak = 20;
     chrome.alarms.clearAll();
     this.addEventListeners();
 };
