@@ -7,6 +7,7 @@ document.getElementById('view-timer-stop').addEventListener("click",function(){
 });
 port.onMessage.addListener(function(msg) {
 	var tomatoStatus = JSON.parse(msg);
+	document.getElementById('view-content').className = tomatoStatus.status;
 	document.getElementById('view-timer-img-status').innerHTML="<img src='images/pomodoro-"+tomatoStatus.status+"-64.png'>";
 	document.getElementById('view-timer-status').innerHTML=tomatoStatus.title;
 

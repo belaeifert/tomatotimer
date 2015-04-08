@@ -7,9 +7,9 @@ tomatoJS.fn.initialize = function() {
     this.isTimerOn = false;
     this.isBreakOn = false;
     this.remainingBreaks = 3;
-    this.lapSize = 25;
-    this.shortBreak = 5;
-    this.longBreak = 15;
+    this.lapSize = 1;
+    this.shortBreak = 1;
+    this.longBreak = 1;
     chrome.alarms.clearAll();
     this.addEventListeners();
 };
@@ -36,11 +36,12 @@ tomatoJS.fn.activeTomato = function () {
         'tomato_start',{
         "type": 'basic', 
         "iconUrl": 'images/pomodoro-active-128.png', 
-        "title": "Let's go!!!", 
-        "message": "Pomodoro started!"
+        "title": "Go!!!", 
+        "message": "New Pomodoro started!"
         },
         function() {}
     );
+    this.ring();
 };
 
 tomatoJS.fn.breakTomato = function () {
@@ -67,6 +68,7 @@ tomatoJS.fn.breakTomato = function () {
         },
         function() {}
     );
+    this.ring();
 };
 
 tomatoJS.fn.stopTomato = function () {
@@ -83,6 +85,7 @@ tomatoJS.fn.stopTomato = function () {
         },
         function() {}
     );
+    this.ring();
 };
 
 tomatoJS.fn.getStatus = function () {
@@ -104,6 +107,12 @@ tomatoJS.fn.getStatus = function () {
     }
     return JSON.stringify(tomatoStatus);
 }
+
+tomatoJS.fn.ring = function () {
+    var tomatoAudio = new Audio();        // create the audio object
+    tomatoAudio.src = "alert.wav"; // assign the audio file to it
+    tomatoAudio.play();
+};
 
 var tomatoTimer =  new tomatoJS();
 

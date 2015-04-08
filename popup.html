@@ -1,15 +1,41 @@
 <html>
 <head>
+	<style>
+		#view-content {
+			width: 250px;
+			text-align: center;
+		}
+		#view-timer-status {
+			font-size: 22px;
+  		font-weight: bold;
+		}
+		#view-time-remaining {
+			font-size: 36px;
+  		font-weight: bold;
+		}
+		#view-content.inactive .btn-stop {
+			display: none;
+		}
+		#view-content.active .btn-start,#view-content.break .btn-start {
+			display: none;
+		}
+		.btn button {
+			width:100%;
+			padding: 8px 0;
+		}
+	</style>
 </head>
 <body>
-	<div id="view-content">
+	<div id="view-content" class="inactive">
 		<div id="view-timer-img-status">
 			<img src="images/pomodoro-inactive-64.png">
 		</div>
 		<div id="view-timer-status">Timer Stopped</div>
 		<div id="view-time-remaining">00:00</div>
-		<div>
+		<div class="btn btn-start">
 			<button id="view-timer-start">Start Timer</button>
+		</div>
+		<div class="btn btn-stop">
 			<button id="view-timer-stop">Stop Timer</button>
 		</div>
 	</div>
