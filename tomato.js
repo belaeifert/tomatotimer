@@ -7,9 +7,10 @@ tomatoJS.fn.initialize = function() {
     this.isTimerOn = false;
     this.isBreakOn = false;
     this.remainingBreaks = 3;
-    this.lapSize = 25;
-    this.shortBreak = 5;
-    this.longBreak = 20;
+
+    this.lapSize = this.getData("lapSize") || 25;
+    this.shortBreak = this.getData("shortBreak") || 5;
+    this.longBreak = this.getData("longBreak") || 15;
 
     this.tomatoAudio = new Audio();
     this.tomatoAudio.src = "alert.wav";
@@ -30,6 +31,17 @@ tomatoJS.fn.addEventListeners = function () {
     });
 };
 
+tomatoJS.fn.getData = function (key) {
+    var item = localStorage.getItem(key);
+    return (item && !isNaN(parseInt(item))) ? parseInt(item) : null;
+}
+
+tomatoJS.fn.updateTomatoData = function () {
+    this.lapSize = this.getData("lapSize") || this.lapSize;
+    this.shortBreak = this.getData("shortBreak") || this.shortBreak;
+    this.longBreak = this.getData("longBreak") || this.longBreak;
+};
+
 tomatoJS.fn.activeTomato = function () {
     this.isTimerOn = true;
     this.isBreakOn = false;
@@ -41,7 +53,7 @@ tomatoJS.fn.activeTomato = function () {
         "type": 'basic', 
         "iconUrl": 'images/pomodoro-active-128.png', 
         "title": "Go!!!", 
-        "message": "New Pomodoro started!"
+        "message": "New Pomodoro started! ("+this.lapSize+" min)"
         },
         function() {}
     );
@@ -129,16 +141,25 @@ var tomatoTimer =  new tomatoJS();
 
 chrome.extension.onConnect.addListener(function(port) {
 
-    port.postMessage(tomatoTimer.getStatus());
+    if(port.name === "tomatoPopupCommunication") {
+        port.postMessage(tomatoTimer.getStatus());
 
-    port.onMessage.addListener(function(msg) {
-        if(msg === "tomato-start") {
-            tomatoTimer.activeTomato();
-            port.postMessage(tomatoTimer.getStatus());
-        }
-        else if(msg === "tomato-stop") {
-            tomatoTimer.stopTomato();
-            port.postMessage(tomatoTimer.getStatus());
-        }
-    });
+        port.onMessage.addListener(function(msg) {
+            if(msg === "tomato-start") {
+                tomatoTimer.activeTomato();
+                port.postMessage(tomatoTimer.getStatus());
+            }
+            else if(msg === "tomato-stop") {
+                tomatoTimer.stopTomato();
+                port.postMessage(tomatoTimer.getStatus());
+            }
+        });
+    }
+    else if(port.name === "tomatoOptionsCommunication") {
+        port.onMessage.addListener(function(msg) {
+            if(msg === "tomato-data-update") {
+                tomatoTimer.updateTomatoData();
+            }
+        });
+    }
 });

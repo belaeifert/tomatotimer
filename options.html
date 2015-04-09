@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		#tomato-options {
+			width: 500px;
+			border: 2px solid #ccc;
+			border-radius: 10px;
+			margin: 30px auto 50px;
+			padding: 50px;
+			text-align: center;
+		}
+		#tomatosave {
+			width:100%;
+			padding: 8px 0;
+		}
+		#tomato-options .field {
+			margin-bottom: 10px;
+		}
+		#tomato-options label {
+			text-align: right;
+			width: 200px;
+			display: inline-block;
+			margin-right: 20px;
+		}
+		#tomato-options input {
+			padding: 5px;
+		}
+		#status {
+			display: block;
+			text-align: center;
+			margin: 20px;
+			font-size: 24px;
+			font-weight: bold;
+		}
+		#tomatosave {
+			margin-top: 20px;
+			display: inline-block;
+		}
+	</style>
+</head>
+<body>
+	<div id="tomato-options">
+		<h1>Tomato Timer Settings</h1>
+		<div id="view-timer-img-status">
+			<img src="images/pomodoro-active-128.png">
+		</div>
+		<div class="field">
+			<label>Pomodoro time (minutes):</label>
+			<input type="text" id="tomatotime" value="" >
+		</div>
+		<div class="field">
+			<label>Pomodoro break time (minutes):</label>
+			<input type="text" id="tomatobreak" value="" >
+		</div>
+		<div class="field">
+			<label>Pomodoro long break time (minutes):</label>
+			<input type="text" id="tomatobreaklong" value="" >
+		</div>
+		<div>
+			<div id="status"></div>
+			<button id="tomatosave">Save</button>
+		</div>
+	</div>
+	<script src="options.js"></script>
+</body>
+</html>

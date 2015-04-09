@@ -1,4 +1,4 @@
-var port = chrome.extension.connect({name: "Tomato Timer Communication"});
+var port = chrome.extension.connect({name: "tomatoPopupCommunication"});
 document.getElementById('view-timer-start').addEventListener("click",function(){
 	port.postMessage("tomato-start");
 });

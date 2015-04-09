@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Tomato Timer",
   "description": "A pomodoro technique timer!",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "browser_action": {
     "default_icon": "images/pomodoro-inactive-19.png",
     "default_title": "Tomato Timer",
@@ -12,7 +12,8 @@
     "tabs",
     "notifications",
     "alarms",
-    "<all_urls>"
+    "<all_urls>",
+    "storage"
   ],
   "background" : {
     "scripts": [
@@ -23,5 +24,6 @@
     "16" : "images/pomodoro-inactive-19.png",
     "48" : "images/pomodoro-inactive-48.png",
     "128" : "images/pomodoro-inactive-128.png"
-  }
+  },
+  "options_page": "options.html"
 }
