@@ -12,6 +12,8 @@ tomatoJS.fn.initialize = function() {
     this.shortBreak = this.getData("shortBreak") || 5;
     this.longBreak = this.getData("longBreak") || 15;
 
+    this.blockUrls = "facebook.com,twitter.com";
+
     this.tomatoAudio = new Audio();
     this.tomatoAudio.src = "alert.wav";
 
@@ -42,7 +44,38 @@ tomatoJS.fn.updateTomatoData = function () {
     this.longBreak = this.getData("longBreak") || this.longBreak;
 };
 
+tomatoJS.fn.blockRequest = function (details) {
+    var notification = chrome.notifications.create(
+        'tomato_block',{
+        "type": 'basic', 
+        "iconUrl": 'images/angry-pomodoro.png', 
+        "title": "Are you kidding me!?!", 
+        "message": "Request blocked by Tomato Timer!"
+        },
+        function() {}
+    );
+  return { redirectUrl: chrome.extension.getURL("block.html") }
+}
+
+tomatoJS.fn.blockSites = function () {
+    blockSites = this.blockUrls.replace(/\s/g,"");
+    blockSites = blockSites.split(",");
+    for (index = 0; index < blockSites.length; ++index) {
+        blockSites[index] = "*://*."+blockSites[index]+"/*";
+    }
+
+    if(chrome.webRequest.onBeforeRequest.hasListener(this.blockRequest))
+        chrome.webRequest.onBeforeRequest.removeListener(this.blockRequest);
+    chrome.webRequest.onBeforeRequest.addListener(this.blockRequest, {urls: blockSites}, ['blocking']);
+}
+
+tomatoJS.fn.unblockSites = function () {
+    if(chrome.webRequest.onBeforeRequest.hasListener(this.blockRequest))
+        chrome.webRequest.onBeforeRequest.removeListener(this.blockRequest);
+}
+
 tomatoJS.fn.activeTomato = function () {
+    this.blockSites();
     this.isTimerOn = true;
     this.isBreakOn = false;
     chrome.alarms.clearAll();
@@ -60,10 +93,11 @@ tomatoJS.fn.activeTomato = function () {
     this.ring();
     var notificationTimeout = window.setTimeout(function(){
         chrome.notifications.clear('tomato_start',function(){});
-    }, 60000);
+    }, 5000);
 };
 
 tomatoJS.fn.breakTomato = function () {
+    this.unblockSites();
     this.isBreakOn = true;
     chrome.alarms.clearAll();
     chrome.browserAction.setIcon({path:"images/pomodoro-break-19.png"});
@@ -94,6 +128,7 @@ tomatoJS.fn.breakTomato = function () {
 };
 
 tomatoJS.fn.stopTomato = function () {
+    this.unblockSites();
     this.isTimerOn = false;
     this.isBreakOn = false;
     chrome.alarms.clearAll();
