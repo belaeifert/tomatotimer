@@ -61,6 +61,9 @@ tomatoJS.fn.blockRequest = function (details) {
         },
         function() {}
     );
+    var notificationTimeout = window.setTimeout(function(){
+        chrome.notifications.clear('tomato_block',function(){});
+    }, 5000);
   return { redirectUrl: chrome.extension.getURL("block.html") }
 }
 
@@ -131,7 +134,7 @@ tomatoJS.fn.breakTomato = function () {
     this.ring();
     var notificationTimeout = window.setTimeout(function(){
         chrome.notifications.clear('tomato_break',function(){});
-    }, 60000);
+    }, 5000);
 };
 
 tomatoJS.fn.stopTomato = function () {
@@ -152,7 +155,7 @@ tomatoJS.fn.stopTomato = function () {
     this.ring();
     var notificationTimeout = window.setTimeout(function(){
         chrome.notifications.clear('tomato_stop',function(){});
-    }, 60000);
+    }, 5000);
 };
 
 tomatoJS.fn.getStatus = function () {
