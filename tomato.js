@@ -12,7 +12,9 @@ tomatoJS.fn.initialize = function() {
     this.shortBreak = this.getData("shortBreak") || 5;
     this.longBreak = this.getData("longBreak") || 15;
 
-    this.blockUrls = "facebook.com,twitter.com";
+    this.blockDefaults = "facebook.com,twitter.com";
+    this.blockUrls = this.getData("blockedUrls") || "";
+    this.blockUrls += ","+this.blockDefaults;
 
     this.tomatoAudio = new Audio();
     this.tomatoAudio.src = "alert.wav";
@@ -35,6 +37,9 @@ tomatoJS.fn.addEventListeners = function () {
 
 tomatoJS.fn.getData = function (key) {
     var item = localStorage.getItem(key);
+    if(key === "blockedUrls") {
+        return (item) ? item : "";
+    }
     return (item && !isNaN(parseInt(item))) ? parseInt(item) : null;
 }
 
@@ -42,6 +47,8 @@ tomatoJS.fn.updateTomatoData = function () {
     this.lapSize = this.getData("lapSize") || this.lapSize;
     this.shortBreak = this.getData("shortBreak") || this.shortBreak;
     this.longBreak = this.getData("longBreak") || this.longBreak;
+    this.blockUrls = this.getData("blockedUrls") || "";
+    this.blockUrls += ","+this.blockDefaults;
 };
 
 tomatoJS.fn.blockRequest = function (details) {
