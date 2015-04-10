@@ -6,6 +6,7 @@ tomatoJS.fn = tomatoJS.prototype;
 tomatoJS.fn.initialize = function() {
     this.isTimerOn = false;
     this.isBreakOn = false;
+    this.isPauseOn = false;
     this.remainingBreaks = 3;
 
     this.lapSize = this.getData("lapSize") || 25;
@@ -13,8 +14,7 @@ tomatoJS.fn.initialize = function() {
     this.longBreak = this.getData("longBreak") || 15;
 
     this.blockDefaults = "facebook.com,twitter.com";
-    this.blockUrls = this.getData("blockedUrls") || "";
-    this.blockUrls += ","+this.blockDefaults;
+    this.blockUrls = this.getData("blockedUrls") || this.blockDefaults;
 
     this.tomatoAudio = new Audio();
     this.tomatoAudio.src = "alert.wav";
@@ -47,11 +47,13 @@ tomatoJS.fn.updateTomatoData = function () {
     this.lapSize = this.getData("lapSize") || this.lapSize;
     this.shortBreak = this.getData("shortBreak") || this.shortBreak;
     this.longBreak = this.getData("longBreak") || this.longBreak;
-    this.blockUrls = this.getData("blockedUrls") || "";
-    this.blockUrls += ","+this.blockDefaults;
+    this.blockUrls = this.getData("blockedUrls") || this.blockDefaults;
 };
 
 tomatoJS.fn.blockRequest = function (details) {
+    blockSound = new Audio();
+    blockSound.src = "banana.wav";
+    blockSound.play();
     var notification = chrome.notifications.create(
         'tomato_block',{
         "type": 'basic', 
@@ -86,17 +88,25 @@ tomatoJS.fn.unblockSites = function () {
 
 tomatoJS.fn.activeTomato = function () {
     this.blockSites();
+    if(this.isPauseOn) {
+        timeMinutes = this.pauseTimeRemaining;
+    }
+    else {
+        timeMinutes = this.lapSize;
+    }
+
     this.isTimerOn = true;
     this.isBreakOn = false;
+    this.isPauseOn = false;
     chrome.alarms.clearAll();
-    chrome.alarms.create("tomato_timer_active", {delayInMinutes: this.lapSize});
+    chrome.alarms.create("tomato_timer_active", {delayInMinutes: timeMinutes});
     chrome.browserAction.setIcon({path:"images/pomodoro-active-19.png"});
     var notification = chrome.notifications.create(
         'tomato_start',{
         "type": 'basic', 
         "iconUrl": 'images/pomodoro-active-128.png', 
         "title": "Go!!!", 
-        "message": "New Pomodoro started! ("+this.lapSize+" min)"
+        "message": "Pomodoro started! ("+timeMinutes+" min)"
         },
         function() {}
     );
@@ -108,18 +118,25 @@ tomatoJS.fn.activeTomato = function () {
 
 tomatoJS.fn.breakTomato = function () {
     this.unblockSites();
+    if(this.isPauseOn) {
+        timeMinutes = this.pauseTimeRemaining;
+    }
+    else {
+        timeMinutes = (this.remainingBreaks > 0)?this.shortBreak:this.longBreak;
+    }
     this.isBreakOn = true;
+    this.isPauseOn = false;
     chrome.alarms.clearAll();
     chrome.browserAction.setIcon({path:"images/pomodoro-break-19.png"});
     if(this.remainingBreaks > 0) {
-        chrome.alarms.create("tomato_timer_break", {delayInMinutes: this.shortBreak});
-        var breakMsg = "Have a break! ("+this.shortBreak+" min)";
+        chrome.alarms.create("tomato_timer_break", {delayInMinutes: timeMinutes});
+        var breakMsg = "Have a break! ("+timeMinutes+" min)";
         this.remainingBreaks--;
     }
     else {
-        chrome.alarms.create("tomato_timer_break", {delayInMinutes: this.longBreak});
+        chrome.alarms.create("tomato_timer_break", {delayInMinutes: timeMinutes});
         this.remainingBreaks = 3;
-        var breakMsg = "Have a long break! ("+this.longBreak+" min)";
+        var breakMsg = "Have a long break! ("+timeMinutes+" min)";
     }
 
     var notification = chrome.notifications.create(
@@ -137,10 +154,48 @@ tomatoJS.fn.breakTomato = function () {
     }, 5000);
 };
 
+tomatoJS.fn.continueTomato = function () {
+    if(this.pausePhase == "active") {
+        this.activeTomato();
+    }
+    else if(this.pausePhase == "break") {
+        this.breakTomato();
+    }
+    else {
+        this.activeTomato();
+    }
+}
+
+tomatoJS.fn.pauseTomato = function (status) {
+    this.unblockSites();
+    this.isTimerOn = false;
+    this.isBreakOn = false;
+    this.isPauseOn = true;
+    status = status.split("|");
+    this.pausePhase = status[1];
+    this.pauseTimeRemaining = parseInt(status[2]);
+    chrome.alarms.clearAll();
+    chrome.browserAction.setIcon({path:"images/pomodoro-paused-19.png"});
+    var notification = chrome.notifications.create(
+        'tomato_pause',{   
+        "type": 'basic', 
+        "iconUrl": 'images/pomodoro-paused-128.png', 
+        "title": "Tomato Timer Paused", 
+        "message": "Pomodoro Paused" 
+        },
+        function() {}
+    );
+    this.ring();
+    var notificationTimeout = window.setTimeout(function(){
+        chrome.notifications.clear('tomato_pause',function(){});
+    }, 5000);
+};
+
 tomatoJS.fn.stopTomato = function () {
     this.unblockSites();
     this.isTimerOn = false;
     this.isBreakOn = false;
+    this.isPauseOn = false;
     chrome.alarms.clearAll();
     chrome.browserAction.setIcon({path:"images/pomodoro-inactive-19.png"});
     var notification = chrome.notifications.create(
@@ -163,13 +218,17 @@ tomatoJS.fn.getStatus = function () {
         "title":"",
         "status":"",
     };
-    if(!this.isTimerOn) {
-        tomatoStatus.title = "Tomato Stopped";
-        tomatoStatus.status = "inactive";
+    if(this.isPauseOn) {
+        tomatoStatus.title = "Tomato Paused!";
+        tomatoStatus.status = "paused";
     }
     else if(this.isBreakOn) {
         tomatoStatus.title = "Have a break!";
         tomatoStatus.status = "break";
+    }
+    else if(!this.isTimerOn) {
+        tomatoStatus.title = "Tomato Stopped";
+        tomatoStatus.status = "inactive";
     }
     else {
         tomatoStatus.title = "Tomato Active!";
@@ -196,6 +255,14 @@ chrome.extension.onConnect.addListener(function(port) {
             }
             else if(msg === "tomato-stop") {
                 tomatoTimer.stopTomato();
+                port.postMessage(tomatoTimer.getStatus());
+            }
+            else if(msg === "tomato-continue") {
+                tomatoTimer.continueTomato();
+                port.postMessage(tomatoTimer.getStatus());
+            }
+            else if(msg.indexOf("tomato-pause") > -1) {
+                tomatoTimer.pauseTomato(msg);
                 port.postMessage(tomatoTimer.getStatus());
             }
         });

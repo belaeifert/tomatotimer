@@ -1,7 +1,14 @@
 # Tomato timer
-## A pomodoro technique timer
+## A pomodoro technique timer and sites blocker
 
-! beta version 2.0.0: configurable times and block domains when is active
+For learn more about the [Pomodoro Technique](http://pomodorotechnique.com/)
+
+*Version 2.0.1:* 
+
+* Start, pause and stop timer
+* configurable intervals
+* block domains to improve your focus
+* cool sounds and icons
 
 by https://github.com/front-bsfreitas
 facebook: facebook.com/brunosilvafreitas

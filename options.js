@@ -27,7 +27,7 @@ function restore_options() {
     document.getElementById('tomatotime').value = localStorage.getItem("lapSize") || 25;
     document.getElementById('tomatobreak').value = localStorage.getItem("shortBreak") || 5;
     document.getElementById('tomatobreaklong').value = localStorage.getItem("longBreak") || 15;
-    document.getElementById('tomatoblock').value = localStorage.getItem("blockedUrls") || "";
+    document.getElementById('tomatoblock').value = localStorage.getItem("blockedUrls") || "facebook.com,twitter.com";
 }
 document.addEventListener('DOMContentLoaded', restore_options);
 document.getElementById('tomatosave').addEventListener('click',
