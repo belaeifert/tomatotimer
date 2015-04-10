@@ -1,5 +1,5 @@
 # Tomato timer
-## A pomodoro technique timer and sites blocker
+## A pomodoro technique timer and domain blocker
 
 For learn more about the [Pomodoro Technique](http://pomodorotechnique.com/)
 
