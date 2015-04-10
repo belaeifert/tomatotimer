@@ -175,7 +175,6 @@ tomatoJS.fn.pauseTomato = function (status) {
     this.pausePhase = status[1];
     this.pauseTimeRemaining = parseInt(status[2]);
     chrome.alarms.clearAll();
-		chrome.alarms.create("tomato_timer_paused", {delayInMinutes: this.pauseTimeRemaining});
     chrome.browserAction.setIcon({path:"images/pomodoro-paused-19.png"});
     var notification = chrome.notifications.create(
         'tomato_pause',{   
@@ -222,6 +221,7 @@ tomatoJS.fn.getStatus = function () {
     if(this.isPauseOn) {
         tomatoStatus.title = "Tomato Paused!";
         tomatoStatus.status = "paused";
+        tomatoStatus.remaining = this.pauseTimeRemaining;
     }
     else if(this.isBreakOn) {
         tomatoStatus.title = "Have a break!";

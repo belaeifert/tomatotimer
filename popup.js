@@ -27,19 +27,28 @@ port.onMessage.addListener(function(msg) {
 	document.getElementById('view-timer-img-status').innerHTML="<img src='images/pomodoro-"+tomatoStatus.status+"-64.png'>";
 	document.getElementById('view-timer-status').innerHTML=tomatoStatus.title;
 
-	chrome.alarms.get("tomato_timer_"+tomatoStatus.status,function(alarm){
-      if(typeof alarm !== "undefined") {
-          var time = new Date(alarm.scheduledTime);
-          var remainingTime = Math.floor(((time-Date.now())/1000)/60)+1;
-          remaining = (remainingTime < 10) ? "0"+remainingTime : remainingTime + "";
-          var remainingText = "less than<div>00:"+remaining+"</div>";
-          remainingText += (remainingTime > 1)?"minutes remaining":"minute remaining";
-          document.getElementById('view-time-remaining').innerHTML=remainingText;
-      }
-      else {
-      	document.getElementById('view-time-remaining').innerHTML="<div>00:00</div>";
-      }
-  });
+  if(tomatoStatus.status === "paused") {
+    var remainingTime = tomatoStatus.remaining;
+    remaining = (remainingTime < 10) ? "0"+remainingTime : remainingTime + "";
+    var remainingText = "less than<div>00:"+remaining+"</div>";
+    remainingText += (remainingTime > 1)?"minutes remaining":"minute remaining";
+    document.getElementById('view-time-remaining').innerHTML=remainingText;
+  }
+  else{
+    chrome.alarms.get("tomato_timer_"+tomatoStatus.status,function(alarm){
+        if(typeof alarm !== "undefined") {
+            var time = new Date(alarm.scheduledTime);
+            var remainingTime = Math.floor(((time-Date.now())/1000)/60)+1;
+            remaining = (remainingTime < 10) ? "0"+remainingTime : remainingTime + "";
+            var remainingText = "less than<div>00:"+remaining+"</div>";
+            remainingText += (remainingTime > 1)?"minutes remaining":"minute remaining";
+            document.getElementById('view-time-remaining').innerHTML=remainingText;
+        }
+        else {
+          document.getElementById('view-time-remaining').innerHTML="<div>00:00</div>";
+        }
+    });
+  }
 
 });
 
